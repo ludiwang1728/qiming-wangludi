@@ -76,7 +76,7 @@ const server = createServer(async (req, res) => {
   try {
     // 静态首页
     if (url.pathname === '/' || url.pathname === '/index.html') {
-      const html = await readFile(path.join(ROOT, 'index.html'), 'utf8')
+      const html = await readFile(path.join(ROOT, 'public/index.html'), 'utf8')
       res.setHeader('Content-Type', 'text/html; charset=utf-8')
       res.end(html)
       return

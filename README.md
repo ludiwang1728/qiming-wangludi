@@ -14,7 +14,8 @@ ai-naming-platform/
 ├── vercel.json             # 起名接口最长执行 60 秒（流式生成需要）
 ├── .gitignore              # 已排除 .env*，密钥不会进仓库
 ├── .env.example            # 环境变量模板，复制成 .env 再填值
-├── index.html              # 单页前端：需求表单 + 模型下拉 + 流式结果 + 历史
+├── public/
+│   └── index.html          # 单页前端：需求表单 + 模型下拉 + 流式结果 + 历史
 ├── api/
 │   ├── name.js             # POST /api/name     起名（SSE 流式）并自动落库
 │   ├── models.js           # GET  /api/models   下拉框数据源（不含密钥）
@@ -94,7 +95,7 @@ npm run dev:local     # 不依赖 vercel CLI，http://localhost:3105
 npm run dev           # 等价于 vercel dev，需要先 npm i -g vercel 并 vercel login
 ```
 
-打开页面，输入 `姓李，男孩，国风典雅，寓意坚韧`，点「开始起名」：文字一点点出现，右上角出现"已保存到 Supabase"，右侧历史里能翻到刚才这条。
+打开 http://localhost:3105 ，输入 `姓李，男孩，国风典雅，寓意坚韧`，点「开始起名」：文字一点点出现，右上角出现"已保存到 Supabase"，右侧历史里能翻到刚才这条。
 
 ### 自检命令
 
