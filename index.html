@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>名启 · AI 起名平台</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%2316241d'/><text x='16' y='23' font-size='19' text-anchor='middle' fill='%23f6efe0' font-family='serif'>名</text></svg>" />
+<style>
+  :root {
+    --paper: #f7f3ea;
+    --paper-deep: #efe8da;
+    --ink: #16241d;
+    --ink-soft: #4a5a52;
+    --line: #ddd3c0;
+    --accent: #0d6b5b;
+    --accent-soft: #e2efeb;
+    --gold: #b0832f;
+    --danger: #a4342a;
+    --card: #fffdf8;
+    --radius: 14px;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    background:
+      radial-gradient(1200px 600px at 12% -10%, #fdfaf3 0%, transparent 60%),
+      radial-gradient(900px 500px at 100% 0%, #eef4ef 0%, transparent 55%),
+      var(--paper);
+    color: var(--ink);
+    font-family: "PingFang SC", "Microsoft YaHei", "Noto Sans SC", system-ui, -apple-system, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    min-height: 100vh;
+    padding: 40px 24px 64px;
+  }
+  .wrap { max-width: 1180px; margin: 0 auto; }
+
+  header.hero { display: flex; align-items: flex-end; justify-content: space-between; gap: 24px; margin-bottom: 30px; }
+  .brand { display: flex; align-items: center; gap: 14px; }
+  .seal {
+    width: 46px; height: 46px; border-radius: 10px; background: var(--ink); color: #f6efe0;
+    display: grid; place-items: center; font-size: 22px; font-weight: 600; letter-spacing: 1px;
+    box-shadow: 0 6px 18px rgba(22,36,29,.18);
+  }
+  h1 { font-size: 30px; margin: 0; font-weight: 600; letter-spacing: 2px; font-family: "Noto Serif SC", "Songti SC", serif; }
+  .sub { margin: 4px 0 0; color: var(--ink-soft); font-size: 13.5px; letter-spacing: .4px; }
+  .hero-note { color: var(--ink-soft); font-size: 12.5px; text-align: right; line-height: 1.7; max-width: 300px; }
+
+  .layout { display: grid; grid-template-columns: minmax(0, 1fr) 360px; gap: 22px; align-items: start; }
+  @media (max-width: 980px) {
+    .layout { grid-template-columns: 1fr; }
+    header.hero { flex-direction: column; align-items: flex-start; }
+    .hero-note { text-align: left; }
+  }
+
+  .card {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    box-shadow: 0 1px 2px rgba(22,36,29,.04), 0 12px 32px -18px rgba(22,36,29,.35);
+  }
+  .card-head { display: flex; align-items: center; justify-content: space-between; padding: 18px 20px 0; }
+  .card-title { font-size: 15px; font-weight: 600; letter-spacing: 1px; }
+  .card-title .dot { display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--gold); margin-right: 8px; vertical-align: 2px; }
+
+  .form-body { padding: 16px 20px 20px; }
+  label.field-label { display: block; font-size: 12.5px; color: var(--ink-soft); margin: 14px 0 8px; letter-spacing: .5px; }
+  label.field-label:first-child { margin-top: 0; }
+
+  textarea {
+    width: 100%; min-height: 104px; resize: vertical; padding: 13px 14px; font: inherit; font-size: 14px; line-height: 1.7;
+    color: var(--ink); background: #fffefb; border: 1px solid var(--line); border-radius: 10px; outline: none;
+    transition: border-color .18s, box-shadow .18s;
+  }
+  textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+  textarea::placeholder { color: #a9a294; }
+
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+  .chip {
+    border: 1px dashed var(--line); background: transparent; color: var(--ink-soft); font-size: 12.5px;
+    padding: 5px 11px; border-radius: 999px; cursor: pointer; transition: all .15s; font-family: inherit;
+  }
+  .chip:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
+
+  .row { display: flex; gap: 12px; align-items: flex-end; }
+  .row > .col { flex: 1; min-width: 0; }
+  select {
+    width: 100%; padding: 11px 12px; font: inherit; font-size: 13.5px; color: var(--ink); background: #fffefb;
+    border: 1px solid var(--line); border-radius: 10px; outline: none; cursor: pointer; appearance: none;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'><path d='M2 4.5 6 8.5 10 4.5' fill='none' stroke='%234a5a52' stroke-width='1.4' stroke-linecap='round'/></svg>");
+    background-repeat: no-repeat; background-position: right 12px center;
+  }
+  select:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+  select option:disabled { color: #b6b0a3; }
+
+  .btn {
+    border: none; border-radius: 10px; font: inherit; font-size: 14px; cursor: pointer; transition: all .16s;
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  }
+  .btn-primary { background: var(--ink); color: #f8f2e6; padding: 13px 26px; letter-spacing: 1.5px; min-width: 150px; }
+  .btn-primary:hover:not(:disabled) { background: #24382d; transform: translateY(-1px); box-shadow: 0 8px 20px -10px rgba(22,36,29,.6); }
+  .btn-primary:disabled { opacity: .55; cursor: not-allowed; }
+  .btn-ghost { background: transparent; border: 1px solid var(--line); color: var(--ink-soft); padding: 8px 14px; font-size: 12.5px; }
+  .btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
+
+  .actions { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 18px; }
+  .hint { font-size: 12px; color: #9a9386; }
+
+  .error-box {
+    display: none; margin-top: 16px; padding: 12px 14px; border-radius: 10px; font-size: 13px; line-height: 1.65;
+    background: #fbf0ee; border: 1px solid #eed5d1; color: var(--danger); white-space: pre-wrap;
+  }
+  .error-box.show { display: block; }
+
+  .result-card { margin-top: 22px; }
+  .status-line { display: flex; align-items: center; gap: 10px; font-size: 12.5px; color: var(--ink-soft); }
+  .pulse { width: 7px; height: 7px; border-radius: 50%; background: var(--accent); animation: pulse 1.1s infinite; }
+  @keyframes pulse { 0%,100% { opacity: 1; transform: scale(1); } 50% { opacity: .35; transform: scale(.8); } }
+
+  #resultBody { padding: 8px 22px 22px; }
+  .result-text { white-space: pre-wrap; line-height: 1.95; font-size: 15px; letter-spacing: .3px; min-height: 120px; color: #22322a; }
+  .result-text .scheme-title {
+    font-family: "Noto Serif SC", "Songti SC", serif; font-size: 17px; font-weight: 600; color: var(--ink);
+    margin: 18px 0 6px; padding-left: 10px; border-left: 3px solid var(--gold); letter-spacing: .5px;
+  }
+  .result-text .scheme-line { color: #2c3d34; padding-left: 13px; }
+  .result-text .scheme-line b { color: var(--ink); font-weight: 600; }
+  .caret { display: inline-block; width: 2px; height: 17px; background: var(--accent); vertical-align: -2px; margin-left: 2px; animation: blink .9s steps(2, start) infinite; }
+  @keyframes blink { 50% { opacity: 0; } }
+
+  .empty-state { color: #a8a193; font-size: 13.5px; line-height: 2; text-align: center; padding: 34px 10px; }
+  .empty-state .big { font-family: "Noto Serif SC", "Songti SC", serif; font-size: 26px; letter-spacing: 6px; color: #cfc6b3; display: block; margin-bottom: 8px; }
+
+  .meta-bar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding: 12px 22px 0; }
+  .tag { font-size: 11.5px; padding: 4px 9px; border-radius: 6px; background: var(--paper-deep); color: var(--ink-soft); letter-spacing: .3px; }
+  .tag.ok { background: var(--accent-soft); color: var(--accent); }
+  .tag.warn { background: #fdf2df; color: #946318; }
+
+  .history-card .card-head { padding-bottom: 12px; }
+  .history-list { padding: 0 14px 6px; max-height: 640px; overflow: auto; }
+  .h-item {
+    border: 1px solid var(--line); border-radius: 10px; padding: 12px 13px; margin-bottom: 10px; background: #fffefb;
+    cursor: pointer; transition: border-color .16s, box-shadow .16s;
+  }
+  .h-item:hover { border-color: #c9bda5; box-shadow: 0 4px 14px -10px rgba(22,36,29,.5); }
+  .h-req { font-size: 13.5px; line-height: 1.6; color: var(--ink); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .h-foot { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 9px; font-size: 11.5px; color: #9a9386; }
+  .h-model { color: var(--accent); background: var(--accent-soft); padding: 2px 7px; border-radius: 5px; }
+  .h-body { display: none; margin-top: 11px; padding-top: 11px; border-top: 1px dashed var(--line); }
+  .h-item.open .h-body { display: block; }
+  .h-item.open .h-req { -webkit-line-clamp: unset; }
+  .h-result { font-size: 12.8px; line-height: 1.9; color: #3b4c43; white-space: pre-wrap; }
+  .history-foot { padding: 0 14px 14px; display: flex; justify-content: center; gap: 8px; }
+  .history-tip { padding: 0 16px 16px; font-size: 12px; line-height: 1.7; color: #a35f18; }
+
+  footer.foot { margin-top: 34px; text-align: center; color: #a39b8b; font-size: 12px; letter-spacing: .5px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="hero">
+    <div class="brand">
+      <div class="seal">名</div>
+      <div>
+        <h1>名启 · AI 起名</h1>
+        <p class="sub">说出你的期待，AI 给出 3 组名字与寓意 · 字字有来历</p>
+      </div>
+    </div>
+    <div class="hero-note">流式生成，边想边写<br />可切换 4 家大模型 + 演示模型 · 方案自动留存</div>
+  </header>
+
+  <div class="layout">
+    <main>
+      <section class="card">
+        <div class="card-head">
+          <div class="card-title"><span class="dot"></span>填写起名需求</div>
+        </div>
+        <div class="form-body">
+          <label class="field-label" for="requirement">需求描述（姓氏、性别、风格、寓意方向、使用场景）</label>
+          <textarea id="requirement" maxlength="200" placeholder="例如：姓李，男孩，偏爱国风典雅，希望寓意坚韧、有书卷气，名字不要太常见"></textarea>
+          <div class="chips" id="chips">
+            <button class="chip" data-text="姓李">姓李</button>
+            <button class="chip" data-text="男孩">男孩</button>
+            <button class="chip" data-text="女孩">女孩</button>
+            <button class="chip" data-text="中性">中性</button>
+            <button class="chip" data-text="国风典雅">国风典雅</button>
+            <button class="chip" data-text="现代简约">现代简约</button>
+            <button class="chip" data-text="温润大气">温润大气</button>
+            <button class="chip" data-text="英文名">英文名</button>
+          </div>
+
+          <div class="row" style="margin-top:16px">
+            <div class="col">
+              <label class="field-label" for="model">选择模型</label>
+              <select id="model"><option value="">加载中…</option></select>
+            </div>
+            <div>
+              <button class="btn btn-primary" id="submitBtn">开始起名</button>
+            </div>
+          </div>
+
+          <div class="actions">
+            <span class="hint" id="hint">每次生成恰好 3 组名字，含读音、寓意与气质说明</span>
+            <button class="btn btn-ghost" id="stopBtn" style="display:none">停止生成</button>
+          </div>
+
+          <div class="error-box" id="errorBox"></div>
+        </div>
+      </section>
+
+      <section class="card result-card">
+        <div class="card-head">
+          <div class="card-title"><span class="dot"></span>起名方案</div>
+          <div class="status-line" id="statusLine"></div>
+        </div>
+        <div class="meta-bar" id="metaBar" style="display:none"></div>
+        <div id="resultBody">
+          <div class="empty-state" id="emptyState">
+            <span class="big">待起名</span>
+            左侧写下你的期待，点击「开始起名」<br />
+            AI 会边生成边显示，给出 3 组名字与寓意
+          </div>
+          <div class="result-text" id="resultText" style="display:none"></div>
+        </div>
+      </section>
+    </main>
+
+    <aside class="card history-card">
+      <div class="card-head">
+        <div class="card-title"><span class="dot"></span>起名历史</div>
+        <button class="btn btn-ghost" id="refreshBtn">刷新</button>
+      </div>
+      <div class="history-list" id="historyList">
+        <div class="empty-state">加载中…</div>
+      </div>
+      <div class="history-tip" id="historyTip" style="display:none"></div>
+      <div class="history-foot">
+        <button class="btn btn-ghost" id="moreBtn" style="display:none">加载更多</button>
+      </div>
+    </aside>
+  </div>
+
+  <footer class="foot">密钥只存在服务端环境变量 · 起名记录存于 Supabase</footer>
+</div>
+
+<script>
+(function () {
+  const state = {
+    models: [],
+    modelLabels: {},
+    controller: null,
+    streaming: false,
+    historyOffset: 0,
+    historyLimit: 10,
+    historyItems: [],
+    historyConfigured: true,
+  };
+
+  const $ = (id) => document.getElementById(id);
+  const requirementEl = $('requirement');
+  const modelEl = $('model');
+  const submitBtn = $('submitBtn');
+  const stopBtn = $('stopBtn');
+  const errorBox = $('errorBox');
+  const resultText = $('resultText');
+  const emptyState = $('emptyState');
+  const statusLine = $('statusLine');
+  const metaBar = $('metaBar');
+  const historyList = $('historyList');
+  const historyTip = $('historyTip');
+  const moreBtn = $('moreBtn');
+
+  function escapeHtml(str) {
+    return String(str).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  }
+
+  function showError(msg) {
+    errorBox.textContent = msg;
+    errorBox.classList.add('show');
+  }
+
+  function clearError() {
+    errorBox.textContent = '';
+    errorBox.classList.remove('show');
+  }
+
+  function formatTime(iso) {
+    if (!iso) return '';
+    const d = new Date(iso);
+    if (Number.isNaN(d.getTime())) return '';
+    const pad = (n) => String(n).padStart(2, '0');
+    return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()) + ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes());
+  }
+
+  // 把模型输出的纯文本排版成便于阅读的样式（先转义，避免注入）
+  function formatResult(text) {
+    const lines = escapeHtml(text).split('\n');
+    const out = [];
+    lines.forEach((line) => {
+      const t = line.trim();
+      if (!t) { out.push('<div class="gap"></div>'); return; }
+      if (/^【方案[一二三1-3]?】/.test(t)) {
+        out.push('<div class="scheme-title">' + t + '</div>');
+        return;
+      }
+      const labeled = t.replace(/^(读音|寓意|气质|拼音)\s*[:：]/, '<b>$1：</b>');
+      out.push('<div class="scheme-line">' + labeled + '</div>');
+    });
+    return out.join('');
+  }
+
+  function renderStreaming(text) {
+    // 生成过程中就按方案结构排版，避免结束时样式突然跳变
+    const html = formatResult(text);
+    resultText.innerHTML = html
+      ? html.replace(/<\/div>$/, '<span class="caret"></span></div>')
+      : '<span class="caret"></span>';
+  }
+
+  // ---------- 模型下拉框 ----------
+  async function loadModels() {
+    try {
+      const res = await fetch('/api/models');
+      if (!res.ok) throw new Error('模型列表获取失败（' + res.status + '）');
+      const data = await res.json();
+      state.models = data.models || [];
+      state.modelLabels = {};
+      modelEl.innerHTML = '';
+      let firstUsable = null;
+      state.models.forEach((m) => {
+        state.modelLabels[m.value] = m.label;
+        const opt = document.createElement('option');
+        opt.value = m.value;
+        opt.textContent = m.label + (m.configured ? '' : '（未配置密钥）');
+        if (!m.configured) opt.disabled = true;
+        if (m.configured && !firstUsable) firstUsable = m.value;
+        modelEl.appendChild(opt);
+      });
+      if (firstUsable) {
+        modelEl.value = firstUsable;
+      } else {
+        modelEl.innerHTML = '<option value="">暂无可用模型，请先配置密钥</option>';
+        showError('还没有任何模型密钥可用。请在环境变量中配置 DOUBAO_API_KEY / DEEPSEEK_API_KEY / DASHSCOPE_API_KEY / KIMI_API_KEY 之一，然后重新部署。');
+      }
+    } catch (err) {
+      modelEl.innerHTML = '<option value="">模型列表不可用</option>';
+      showError(err.message || '模型列表获取失败');
+    }
+  }
+
+  // ---------- 起名 ----------
+  async function submit() {
+    if (state.streaming) return;
+    clearError();
+
+    const requirement = requirementEl.value.trim();
+    const model = modelEl.value;
+
+    if (!requirement) {
+      showError('请先写下起名需求，例如：姓李，男孩，国风典雅，寓意坚韧');
+      requirementEl.focus();
+      return;
+    }
+    if (!model) {
+      showError('当前没有可用模型，请先在环境变量里配置模型密钥');
+      return;
+    }
+
+    state.streaming = true;
+    submitBtn.disabled = true;
+    stopBtn.style.display = 'inline-flex';
+    emptyState.style.display = 'none';
+    resultText.style.display = 'block';
+    resultText.textContent = '';
+    metaBar.style.display = 'none';
+    statusLine.innerHTML = '<span class="pulse"></span><span>正在起名…</span>';
+
+    state.controller = new AbortController();
+    let fullText = '';
+    let timer = setInterval(() => {
+      statusLine.innerHTML = '<span class="pulse"></span><span>正在起名… ' + fullText.length + ' 字</span>';
+    }, 150);
+
+    try {
+      const res = await fetch('/api/name', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ requirement, model }),
+        signal: state.controller.signal,
+      });
+
+      const contentType = res.headers.get('content-type') || '';
+      if (!res.ok || !contentType.includes('text/event-stream')) {
+        let msg = '起名失败（HTTP ' + res.status + '）';
+        try {
+          const data = await res.json();
+          if (data && data.error) msg = data.error;
+        } catch (e) { /* 响应不是 JSON 时用默认文案 */ }
+        throw new Error(msg);
+      }
+
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder('utf-8');
+      let buffer = '';
+      let doneMeta = null;
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+        const blocks = buffer.split('\n\n');
+        buffer = blocks.pop() || '';
+
+        for (const block of blocks) {
+          for (const line of block.split('\n')) {
+            const trimmed = line.trim();
+            if (!trimmed.startsWith('data:')) continue;
+            let payload;
+            try { payload = JSON.parse(trimmed.slice(5).trim()); } catch (e) { continue; }
+
+            if (payload.error) throw new Error(payload.error);
+            if (payload.delta) {
+              fullText += payload.delta;
+              renderStreaming(fullText);
+            }
+            if (payload.done) doneMeta = payload;
+          }
+        }
+      }
+
+      clearInterval(timer);
+      timer = null;
+
+      if (!fullText.trim()) throw new Error('模型没有返回内容，请换个模型或稍后重试');
+
+      resultText.innerHTML = formatResult(fullText);
+      statusLine.innerHTML = '<span>已完成</span>';
+
+      if (doneMeta) {
+        const secs = ((doneMeta.elapsedMs || 0) / 1000).toFixed(1);
+        const items = [
+          '<span class="tag">' + escapeHtml(doneMeta.modelLabel || model) + '</span>',
+          '<span class="tag">用时 ' + secs + ' 秒</span>',
+        ];
+        if (doneMeta.saved) {
+          items.push('<span class="tag ok">已保存到 Supabase</span>');
+        } else if (doneMeta.saveError) {
+          items.push('<span class="tag warn">未保存：' + escapeHtml(String(doneMeta.saveError).slice(0, 60)) + '</span>');
+        }
+        metaBar.innerHTML = items.join('');
+        metaBar.style.display = 'flex';
+      }
+
+      loadHistory(true);
+    } catch (err) {
+      if (err && err.name === 'AbortError') {
+        statusLine.innerHTML = '<span>已停止生成</span>';
+        if (fullText.trim()) resultText.innerHTML = formatResult(fullText);
+      } else {
+        statusLine.innerHTML = '';
+        showError(err.message || '起名失败，请稍后重试');
+        if (fullText.trim()) {
+          resultText.innerHTML = formatResult(fullText);
+        } else {
+          emptyState.style.display = 'block';
+          resultText.style.display = 'none';
+        }
+      }
+    } finally {
+      if (timer) clearInterval(timer);
+      state.streaming = false;
+      submitBtn.disabled = false;
+      stopBtn.style.display = 'none';
+      state.controller = null;
+    }
+  }
+
+  // ---------- 历史记录 ----------
+  // 历史记录报错时，如果是“表没建”，直接给一条能复制的建表 SQL
+  const QUICK_SQL = [
+    'create table if not exists public.name_history (',
+    '  id bigint generated by default as identity primary key,',
+    '  user_requirement text not null,',
+    '  name_result text not null,',
+    '  model_name text not null,',
+    '  created_at timestamptz not null default now()',
+    ');',
+    'alter table public.name_history enable row level security;',
+    'create policy "name_history_anon_insert" on public.name_history for insert to anon, authenticated with check (true);',
+    'create policy "name_history_anon_select" on public.name_history for select to anon, authenticated using (true);',
+  ].join('\n');
+
+  function renderHistoryError(message) {
+    historyTip.style.display = 'block';
+    historyTip.textContent = '读取历史记录失败：' + message;
+
+    if (!/表|schema\.sql|name_history/i.test(message)) return;
+
+    const btn = document.createElement('button');
+    btn.className = 'btn btn-ghost';
+    btn.style.marginTop = '8px';
+    btn.textContent = '复制建表 SQL';
+    btn.addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(QUICK_SQL);
+        btn.textContent = '已复制，去 Supabase SQL Editor 粘贴执行';
+      } catch (e) {
+        window.prompt('手动复制下面这段 SQL：', QUICK_SQL);
+      }
+    });
+    historyTip.appendChild(document.createElement('br'));
+    historyTip.appendChild(btn);
+  }
+
+  async function loadHistory(reset) {
+    if (reset) {
+      state.historyOffset = 0;
+      state.historyItems = [];
+    }
+
+    try {
+      const res = await fetch('/api/history?limit=' + state.historyLimit + '&offset=' + state.historyOffset);
+      const data = await res.json();
+
+      if (data.configured === false || data.error && !data.items) {
+        state.historyConfigured = false;
+        historyList.innerHTML = '<div class="empty-state">历史记录暂不可用<br />请先配置 Supabase</div>';
+        historyTip.style.display = 'block';
+        historyTip.textContent = data.error || '未配置 Supabase，起名结果不会保存。';
+        moreBtn.style.display = 'none';
+        return;
+      }
+
+      state.historyConfigured = data.configured !== false;
+      if (data.error) {
+        renderHistoryError(data.error);
+      } else {
+        historyTip.style.display = 'none';
+      }
+
+      const items = data.items || [];
+      if (reset) state.historyItems = items;
+      else state.historyItems = state.historyItems.concat(items);
+
+      if (state.historyItems.length === 0) {
+        historyList.innerHTML = '<div class="empty-state">还没有记录<br />起名一次，方案就会留在这里</div>';
+        moreBtn.style.display = 'none';
+        return;
+      }
+
+      renderHistory();
+      state.historyOffset += items.length;
+      moreBtn.style.display = items.length >= state.historyLimit ? 'inline-flex' : 'none';
+    } catch (err) {
+      if (reset) {
+        historyList.innerHTML = '<div class="empty-state">历史记录加载失败</div>';
+        historyTip.style.display = 'block';
+        historyTip.textContent = err.message || '';
+      }
+    }
+  }
+
+  function renderHistory() {
+    historyList.innerHTML = state.historyItems.map((item, idx) => {
+      const label = state.modelLabels[item.model_name] || item.model_name || '未知模型';
+      return (
+        '<div class="h-item" data-idx="' + idx + '">' +
+          '<div class="h-req">' + escapeHtml(item.user_requirement || '') + '</div>' +
+          '<div class="h-foot"><span class="h-model">' + escapeHtml(label) + '</span><span>' + formatTime(item.created_at) + '</span></div>' +
+          '<div class="h-body"><div class="h-result">' + escapeHtml(item.name_result || '') + '</div></div>' +
+        '</div>'
+      );
+    }).join('');
+
+    historyList.querySelectorAll('.h-item').forEach((el) => {
+      el.addEventListener('click', () => el.classList.toggle('open'));
+    });
+  }
+
+  // ---------- 事件绑定 ----------
+  $('chips').addEventListener('click', (e) => {
+    const btn = e.target.closest('.chip');
+    if (!btn) return;
+    const text = btn.dataset.text || '';
+    const current = requirementEl.value.trim();
+    if (current.includes(text)) return;
+    requirementEl.value = current ? current + '，' + text : text;
+    requirementEl.focus();
+  });
+
+  submitBtn.addEventListener('click', submit);
+
+  requirementEl.addEventListener('keydown', (e) => {
+    if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') submit();
+  });
+
+  stopBtn.addEventListener('click', () => {
+    if (state.controller) state.controller.abort();
+  });
+
+  $('refreshBtn').addEventListener('click', () => loadHistory(true));
+  moreBtn.addEventListener('click', () => loadHistory(false));
+
+  loadModels();
+  loadHistory(true);
+})();
+</script>
+</body>
+</html>

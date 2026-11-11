@@ -1,0 +1,15 @@
+# 依赖与构建产物
+node_modules/
+.vercel/
+dist/
+
+# 环境变量：绝不能提交，密钥只放在本地 .env 与 Vercel 面板
+# 注意保留 .env.example 模板本身
+.env
+.env.local
+.env.*.local
+!.env.example
+
+# 系统与编辑器的临时文件
+.DS_Store
+*.log
